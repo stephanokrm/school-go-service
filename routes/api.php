@@ -35,5 +35,5 @@ Route::middleware('auth:api')->group(function () {
 //    Route::apiResource('breed', BreedController::class);
 //    Route::apiResource('image', ImageController::class)->only('destroy');
 //    Route::apiResource('interest', InterestController::class)->except('store', 'destroy', 'show');
-//    Route::apiResource('user', UserController::class)->except('store');
+    Route::apiResource('user', UserController::class);
 });
