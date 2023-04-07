@@ -12,12 +12,25 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     /**
+     * @return UserResource
+     */
+    public function index(): UserResource
+    {
+        return new UserResource(User::all());
+    }
+
+    /**
      * @param Request $request
      * @return UserResource
      */
     public function me(Request $request): UserResource
     {
         return new UserResource($request->user());
+    }
+
+    public function show(User $user): UserResource
+    {
+        return new UserResource($user);
     }
 
     public function store(StoreUserRequest $request): UserResource
