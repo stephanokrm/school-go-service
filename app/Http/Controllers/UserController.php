@@ -2,15 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role as RoleEnum;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Role;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private readonly UserService $userService
+    )
+    {
+    }
+
     /**
      * @return UserResource
      */
@@ -35,22 +43,17 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request): UserResource
     {
-        $user = new User();
-        $user->fill($request->all());
+        $roles = Role::query()->where('role', RoleEnum::Administrator->value)->pluck('id');
 
-        $request->whenFilled('password', function ($password) use ($user) {
-            $user->setAttribute('password', Hash::make($password));
-        });
-
-        $user->save();
+        $user = $this->userService->store($request, collect($request->all()));
+        $user->roles()->sync($roles);
 
         return new UserResource($user);
     }
 
     public function update(UpdateUserRequest $request, User $user): UserResource
     {
-        $user->fill($request->except('password'));
-        $user->save();
+        $user = $this->userService->update($user, collect($request->all()));
 
         return new UserResource($user);
     }

@@ -27,8 +27,8 @@ class UpdateUserRequest extends FormRequest
         return [
             'first_name' => ['required', 'max:255'],
             'last_name' => ['required', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignoreModel($user)],
-            'cell_phone' => ['required', Rule::phone()->country(['BR'])->type('mobile')],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignoreModel($user)],
+            'cell_phone' => ['required', Rule::phone()->country(['BR'])->type('mobile'), Rule::unique('users', 'cell_phone')->ignoreModel($user)],
         ];
     }
 }
