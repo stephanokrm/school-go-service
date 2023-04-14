@@ -22,7 +22,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/user/logout', [UserController::class, 'logout']);
     Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
     Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
-    Route::apiResource('school', SchoolController::class)->only('index', 'store');
+    Route::apiResource('school', SchoolController::class)->only('index', 'store', 'show', 'update');
     Route::apiResource('user', UserController::class);
     Route::apiResource('user.driver', DriverController::class)->only('update', 'destroy');
 });
