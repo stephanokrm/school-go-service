@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\GoogleMapsController;
+use App\Http\Controllers\ResponsibleController;
 use App\Http\Controllers\SchoolController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,7 +24,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/user/logout', [UserController::class, 'logout']);
     Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
     Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
+    Route::apiResource('responsible', ResponsibleController::class)->only('index', 'store', 'show');
     Route::apiResource('school', SchoolController::class)->only('index', 'store', 'show', 'update');
+    Route::apiResource('student', StudentController::class);
     Route::apiResource('user', UserController::class);
     Route::apiResource('user.driver', DriverController::class)->only('update', 'destroy');
+    Route::apiResource('user.responsible', ResponsibleController::class)->only('update', 'destroy');
 });

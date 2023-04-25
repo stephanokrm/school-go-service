@@ -24,7 +24,7 @@ class UserController extends Controller
      */
     public function index(): UserResource
     {
-        return new UserResource(User::all());
+        return new UserResource(User::query()->orderBy('first_name')->orderBy('last_name')->get());
     }
 
     /**

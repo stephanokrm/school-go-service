@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class School extends Model
+class Student extends Model
 {
     use HasFactory;
 
@@ -14,6 +14,8 @@ class School extends Model
      * @var string[]
      */
     protected $casts = [
+        'goes' => 'boolean',
+        'return' => 'boolean',
         'morning' => 'boolean',
         'afternoon' => 'boolean',
         'night' => 'boolean',
@@ -23,16 +25,13 @@ class School extends Model
      * @var string[]
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'goes',
+        'return',
         'morning',
         'afternoon',
         'night',
-        'morning_entry_time',
-        'morning_departure_time',
-        'afternoon_entry_time',
-        'afternoon_departure_time',
-        'night_entry_time',
-        'night_departure_time',
     ];
 
     /**
@@ -40,6 +39,8 @@ class School extends Model
      */
     protected $with = [
         'address',
+        'responsible',
+        'school',
     ];
 
     /**
@@ -48,5 +49,21 @@ class School extends Model
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function responsible(): BelongsTo
+    {
+        return $this->belongsTo(Responsible::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function school(): BelongsTo
+    {
+        return $this->belongsTo(School::class);
     }
 }

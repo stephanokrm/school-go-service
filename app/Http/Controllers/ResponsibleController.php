@@ -2,26 +2,50 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role as RoleEnum;
 use App\Http\Requests\StoreResponsibleRequest;
 use App\Http\Requests\UpdateResponsibleRequest;
+use App\Http\Resources\ResponsibleResource;
 use App\Models\Responsible;
+use App\Models\Role;
+use App\Services\UserService;
 
 class ResponsibleController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @param UserService $userService
      */
-    public function index()
+    public function __construct(
+        private readonly UserService $userService
+    )
     {
-        //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @return ResponsibleResource
      */
-    public function store(StoreResponsibleRequest $request)
+    public function index(): ResponsibleResource
     {
-        //
+        return new ResponsibleResource(Responsible::all());
+    }
+
+    /**
+     * @param StoreResponsibleRequest $request
+     * @return ResponsibleResource
+     */
+    public function store(StoreResponsibleRequest $request): ResponsibleResource
+    {
+        $roles = Role::query()->where('role', RoleEnum::Responsible->value)->pluck('id');
+
+        $user = $this->userService->store($request, collect($request->input('user')));
+        $user->roles()->sync($roles);
+
+        $responsible = new Responsible();
+        $responsible->fill($request->except('user'));
+        $responsible->user()->associate($user);
+        $responsible->save();
+
+        return new ResponsibleResource($responsible);
     }
 
     /**

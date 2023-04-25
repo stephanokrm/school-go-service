@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
-class StoreSchoolRequest extends StoreAddressRequest
+use Illuminate\Validation\Rule;
+
+class StoreStudentRequest extends StoreAddressRequest
 {
     /**
      * @return bool
@@ -23,16 +25,15 @@ class StoreSchoolRequest extends StoreAddressRequest
 
         return [
             ...$rules,
-            'name' => ['required'],
+            'first_name' => ['required', 'max:255'],
+            'last_name' => ['required', 'max:255'],
+            'goes' => ['sometimes', 'boolean'],
+            'return' => ['sometimes', 'boolean'],
             'morning' => ['sometimes', 'boolean'],
             'afternoon' => ['sometimes', 'boolean'],
             'night' => ['sometimes', 'boolean'],
-            'morningEntryTime' => ['sometimes'],
-            'morningDepartureTime' => ['sometimes'],
-            'afternoonEntryTime' => ['sometimes'],
-            'afternoonDepartureTime' => ['sometimes'],
-            'nightEntryTime' => ['sometimes'],
-            'nightDepartureTime' => ['sometimes'],
+            'responsible.id' => ['required', 'integer', Rule::exists('responsibles', 'id')],
+            'school.id' => ['required', 'integer', Rule::exists('schools', 'id')],
         ];
     }
 }

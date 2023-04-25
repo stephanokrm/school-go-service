@@ -42,6 +42,13 @@ class User extends Authenticatable
     ];
 
     /**
+     * @var string[]
+     */
+    protected $with = [
+        'roles',
+    ];
+
+    /**
      * @return BelongsToMany
      */
     public function roles(): BelongsToMany

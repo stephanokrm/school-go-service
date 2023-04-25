@@ -15,7 +15,7 @@ class SchoolController extends Controller
      */
     public function index(): SchoolResource
     {
-        return new SchoolResource(School::with('address')->get());
+        return new SchoolResource(School::query()->orderBy('name')->get());
     }
 
     /**
@@ -76,7 +76,7 @@ class SchoolController extends Controller
     {
         $school->address->fill($request->input('address'));
         $school->address->save();
-        $school->fill($request->all());
+        $school->fill($request->except('address'));
 
         $request->whenFilled('morning', function ($morning) use ($request, $school) {
             if ($morning) {
