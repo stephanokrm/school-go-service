@@ -4,21 +4,37 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
-use App\Http\Resources\SchoolResource;
 use App\Http\Resources\StudentResource;
 use App\Models\Address;
 use App\Models\Responsible;
 use App\Models\School;
 use App\Models\Student;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
     /**
+     * @param Request $request
      * @return StudentResource
      */
-    public function index(): StudentResource
+    public function index(Request $request): StudentResource
     {
-        return new StudentResource(Student::query()->orderBy('first_name')->orderBy('last_name')->get());
+        $students = Student::query()
+            ->when($request->filled('morning'), function (Builder $builder) use ($request) {
+                $builder->where('morning', $request->input('morning'));
+            })
+            ->when($request->filled('afternoon'), function (Builder $builder) use ($request) {
+                $builder->where('afternoon', $request->input('afternoon'));
+            })
+            ->when($request->filled('night'), function (Builder $builder) use ($request) {
+                $builder->where('night', $request->input('night'));
+            })
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+
+        return new StudentResource($students);
     }
 
     /**
