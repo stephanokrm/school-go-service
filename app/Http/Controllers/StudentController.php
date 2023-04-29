@@ -81,7 +81,7 @@ class StudentController extends Controller
 
         $student->address->fill($request->input('address'));
         $student->address->save();
-        $student->fill($request->except('address', 'responsible', 'school'));
+        $student->fill($student->getFillable());
         $student->responsible()->associate($responsible);
         $student->school()->associate($school);
         $student->save();

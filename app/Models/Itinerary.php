@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Student extends Model
+class Itinerary extends Model
 {
     use HasFactory;
 
@@ -15,8 +15,11 @@ class Student extends Model
      * @var string[]
      */
     protected $casts = [
-        'goes' => 'boolean',
-        'return' => 'boolean',
+        'monday' => 'boolean',
+        'tuesday' => 'boolean',
+        'wednesday' => 'boolean',
+        'thursday' => 'boolean',
+        'friday' => 'boolean',
         'morning' => 'boolean',
         'afternoon' => 'boolean',
         'night' => 'boolean',
@@ -26,10 +29,11 @@ class Student extends Model
      * @var string[]
      */
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'goes',
-        'return',
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
         'morning',
         'afternoon',
         'night',
@@ -39,25 +43,16 @@ class Student extends Model
      * @var string[]
      */
     protected $with = [
-        'address',
-        'responsible',
+        'driver',
         'school',
     ];
 
     /**
      * @return BelongsTo
      */
-    public function address(): BelongsTo
+    public function driver(): BelongsTo
     {
-        return $this->belongsTo(Address::class);
-    }
-
-    /**
-     * @return BelongsTo
-     */
-    public function responsible(): BelongsTo
-    {
-        return $this->belongsTo(Responsible::class);
+        return $this->belongsTo(Driver::class);
     }
 
     /**
@@ -71,8 +66,8 @@ class Student extends Model
     /**
      * @return BelongsToMany
      */
-    public function itineraries(): BelongsToMany
+    public function students(): BelongsToMany
     {
-        return $this->belongsToMany(Itinerary::class);
+        return $this->belongsToMany(Student::class);
     }
 }

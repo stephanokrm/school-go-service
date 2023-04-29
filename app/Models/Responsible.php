@@ -17,7 +17,6 @@ class Responsible extends Model
         'user',
     ];
 
-
     /**
      * @return BelongsTo
      */

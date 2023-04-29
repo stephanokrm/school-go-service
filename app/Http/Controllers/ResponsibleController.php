@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateResponsibleRequest;
 use App\Http\Resources\ResponsibleResource;
 use App\Models\Responsible;
 use App\Models\Role;
+use App\Models\User;
 use App\Services\UserService;
 
 class ResponsibleController extends Controller
@@ -49,26 +50,40 @@ class ResponsibleController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @param Responsible $responsible
+     * @return ResponsibleResource
      */
-    public function show(Responsible $responsible)
+    public function show(Responsible $responsible): ResponsibleResource
     {
-        //
+        return new ResponsibleResource($responsible);
     }
 
     /**
-     * Update the specified resource in storage.
+     * @param UpdateResponsibleRequest $request
+     * @param User $user
+     * @param Responsible $responsible
+     * @return ResponsibleResource
      */
-    public function update(UpdateResponsibleRequest $request, Responsible $responsible)
+    public function update(UpdateResponsibleRequest $request, User $user, Responsible $responsible): ResponsibleResource
     {
-        //
+        $user = $this->userService->update($user, collect($request->input('user')));
+
+        $responsible->user()->associate($user);
+        $responsible->save();
+
+        return new ResponsibleResource($responsible);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @param User $user
+     * @param Responsible $responsible
+     * @return ResponsibleResource
      */
-    public function destroy(Responsible $responsible)
+    public function destroy(User $user, Responsible $responsible): ResponsibleResource
     {
-        //
+        $responsible->delete();
+        $user->delete();
+
+        return new ResponsibleResource($responsible);
     }
 }

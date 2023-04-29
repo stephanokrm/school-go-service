@@ -2,27 +2,27 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class UpdateResponsibleRequest extends FormRequest
+class UpdateResponsibleRequest extends UpdateUserRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * @return bool
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
+     * @return array
      */
     public function rules(): array
     {
+        $rules = collect(parent::rules())->mapWithKeys(function (array $rules, string $field) {
+            return ["user.{$field}" => $rules];
+        });
+
         return [
-            //
+            ...$rules,
         ];
     }
 }

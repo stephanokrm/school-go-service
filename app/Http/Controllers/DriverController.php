@@ -39,7 +39,7 @@ class DriverController extends Controller
         $user->roles()->sync($roles);
 
         $driver = new Driver();
-        $driver->fill($request->all());
+        $driver->fill($request->only($driver->getFillable()));
         $driver->user()->associate($user);
         $driver->save();
 
@@ -52,7 +52,7 @@ class DriverController extends Controller
      */
     public function show(Driver $driver): DriverResource
     {
-        return new DriverResource($driver->load('user'));
+        return new DriverResource($driver);
     }
 
     /**
@@ -65,7 +65,7 @@ class DriverController extends Controller
     {
         $user = $this->userService->update($user, collect($request->input('user')));
 
-        $driver->fill($request->all());
+        $driver->fill($request->only($driver->getFillable()));
         $driver->user()->associate($user);
         $driver->save();
 
