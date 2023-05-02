@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\UserService;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -48,6 +49,8 @@ class UserController extends Controller
         $user = $this->userService->store($request, collect($request->all()));
         $user->roles()->sync($roles);
 
+        event(new Registered($user));
+
         return new UserResource($user);
     }
 
@@ -65,5 +68,18 @@ class UserController extends Controller
     public function logout(Request $request): mixed
     {
         return $request->user()->token()->revoke();
+    }
+
+    /**
+     * @param Request $request
+     * @return bool
+     */
+    public function email(Request $request): bool
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        return User::query()->where('email', $request->query('email'))->exists();
     }
 }

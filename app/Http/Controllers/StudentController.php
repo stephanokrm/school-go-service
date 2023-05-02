@@ -22,13 +22,13 @@ class StudentController extends Controller
     {
         $students = Student::query()
             ->when($request->filled('morning'), function (Builder $builder) use ($request) {
-                $builder->where('morning', $request->input('morning'));
+                $builder->orWhere('morning', $request->input('morning'));
             })
             ->when($request->filled('afternoon'), function (Builder $builder) use ($request) {
-                $builder->where('afternoon', $request->input('afternoon'));
+                $builder->orWhere('afternoon', $request->input('afternoon'));
             })
             ->when($request->filled('night'), function (Builder $builder) use ($request) {
-                $builder->where('night', $request->input('night'));
+                $builder->orWhere('night', $request->input('night'));
             })
             ->orderBy('first_name')
             ->orderBy('last_name')

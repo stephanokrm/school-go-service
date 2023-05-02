@@ -62,12 +62,4 @@ class Itinerary extends Model
     {
         return $this->belongsTo(School::class);
     }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function students(): BelongsToMany
-    {
-        return $this->belongsToMany(Student::class);
-    }
 }

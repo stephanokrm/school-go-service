@@ -71,8 +71,8 @@ class Student extends Model
     /**
      * @return BelongsToMany
      */
-    public function itineraries(): BelongsToMany
+    public function trips(): BelongsToMany
     {
-        return $this->belongsToMany(Itinerary::class);
+        return $this->belongsToMany(Student::class)->withTimestamps();
     }
 }
