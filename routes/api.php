@@ -20,16 +20,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['verified', 'auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/me', [UserController::class, 'me']);
     Route::post('/user/logout', [UserController::class, 'logout']);
-    Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
-    Route::apiResource('itinerary', ItineraryController::class);
-    Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
-    Route::apiResource('responsible', ResponsibleController::class)->only('index', 'store', 'show');
-    Route::apiResource('school', SchoolController::class)->only('index', 'store', 'show', 'update');
-    Route::apiResource('student', StudentController::class);
-    Route::apiResource('user', UserController::class);
-    Route::apiResource('user.driver', DriverController::class)->only('update', 'destroy');
-    Route::apiResource('user.responsible', ResponsibleController::class)->only('update', 'destroy');
+
+    Route::middleware(['verified'])->group(function () {
+        Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
+        Route::apiResource('itinerary', ItineraryController::class);
+        Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
+        Route::apiResource('responsible', ResponsibleController::class)->only('index', 'store', 'show');
+        Route::apiResource('school', SchoolController::class)->only('index', 'store', 'show', 'update');
+        Route::apiResource('student', StudentController::class);
+        Route::apiResource('user', UserController::class);
+        Route::apiResource('user.driver', DriverController::class)->only('update', 'destroy');
+        Route::apiResource('user.responsible', ResponsibleController::class)->only('update', 'destroy');
+    });
 });
