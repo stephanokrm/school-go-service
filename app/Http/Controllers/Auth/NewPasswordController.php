@@ -34,11 +34,14 @@ class NewPasswordController extends Controller
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
                 $user->forceFill([
+                    'email_verified_at' => null,
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
                 ])->save();
 
                 event(new PasswordReset($user));
+
+                $user->sendEmailVerificationNotification();
             }
         );
 

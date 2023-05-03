@@ -22,6 +22,8 @@ class UserService
 
         $request->whenFilled('password', function ($password) use ($user) {
             $user->setAttribute('password', Hash::make($password));
+        }, function ()use ($user) {
+            $user->setAttribute('password', Hash::make('password'));
         });
 
         $user->save();

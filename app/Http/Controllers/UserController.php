@@ -9,8 +9,8 @@ use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\UserService;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller
 {
@@ -49,7 +49,9 @@ class UserController extends Controller
         $user = $this->userService->store($request, collect($request->all()));
         $user->roles()->sync($roles);
 
-        event(new Registered($user));
+        Password::sendResetLink([
+            'email' => $user->getAttribute('email'),
+        ]);
 
         return new UserResource($user);
     }
