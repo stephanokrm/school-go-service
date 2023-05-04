@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 
@@ -74,14 +75,21 @@ class UserController extends Controller
 
     /**
      * @param Request $request
-     * @return bool
+     * @return JsonResponse
      */
-    public function email(Request $request): bool
+    public function state(Request $request): JsonResponse
     {
         $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        return User::query()->where('email', $request->query('email'))->exists();
+        $user = User::query()->where('email', $request->query('email'))->firstOrNew();
+
+        return response()->json([
+            'exists' => $user->getKey() !== null,
+            'first_name' => $user->getAttribute('first_name'),
+            'email' => $user->getAttribute('email'),
+            'verified' => $user->hasVerifiedEmail(),
+        ]);
     }
 }
