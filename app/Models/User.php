@@ -20,6 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'cell_phone',
+        'fcm_token',
     ];
 
     /**
@@ -47,6 +48,14 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $with = [
         'roles',
     ];
+
+    /**
+     * @return string|null
+     */
+    public function routeNotificationForFcm(): ?string
+    {
+        return $this->getAttribute('fcm_token');
+    }
 
     /**
      * @return BelongsToMany

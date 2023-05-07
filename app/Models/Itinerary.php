@@ -62,4 +62,28 @@ class Itinerary extends Model
     {
         return $this->belongsTo(School::class);
     }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class)->withTimestamps();
+    }
+
+    /**
+     * @return Driver
+     */
+    public function getDriver(): Driver
+    {
+        return $this->getAttribute('driver');
+    }
+
+    /**
+     * @return School
+     */
+    public function getSchool(): School
+    {
+        return $this->getAttribute('school');
+    }
 }

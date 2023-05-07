@@ -8,15 +8,42 @@ use App\Http\Resources\ItineraryResource;
 use App\Models\Driver;
 use App\Models\Itinerary;
 use App\Models\School;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class ItineraryController extends Controller
 {
     /**
+     * @param Request $request
      * @return ItineraryResource
      */
-    public function index(): ItineraryResource
+    public function index(Request $request): ItineraryResource
     {
-        return new ItineraryResource(Itinerary::all());
+        $today = Carbon::today();
+
+        $itineraries = Itinerary::query()
+            ->when($today->isMonday(), function (Builder $builder) {
+                $builder->orWhere('monday', true);
+            })
+            ->when($today->isTuesday(), function (Builder $builder) {
+                $builder->orWhere('tuesday', true);
+            })
+            ->when($today->isWednesday(), function (Builder $builder) {
+                $builder->orWhere('wednesday', true);
+            })
+            ->when($today->isThursday(), function (Builder $builder) {
+                $builder->orWhere('thursday', true);
+            })
+            ->when($today->isFriday(), function (Builder $builder) {
+                $builder->orWhere('friday', true);
+            })
+            ->when($request->query('driver', false), function (Builder $builder) use ($request) {
+                $builder->where('driver_id', $request->user()->driver->id);
+            })
+            ->get();
+
+        return new ItineraryResource($itineraries);
     }
 
     /**

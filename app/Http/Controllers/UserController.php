@@ -9,9 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\UserService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller
 {
@@ -50,10 +48,6 @@ class UserController extends Controller
         $user = $this->userService->store($request, collect($request->all()));
         $user->roles()->sync($roles);
 
-        Password::sendResetLink([
-            'email' => $user->getAttribute('email'),
-        ]);
-
         return new UserResource($user);
     }
 
@@ -71,25 +65,5 @@ class UserController extends Controller
     public function logout(Request $request): mixed
     {
         return $request->user()->token()->revoke();
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function state(Request $request): JsonResponse
-    {
-        $request->validate([
-            'email' => ['required', 'email'],
-        ]);
-
-        $user = User::query()->where('email', $request->query('email'))->firstOrNew();
-
-        return response()->json([
-            'exists' => $user->getKey() !== null,
-            'first_name' => $user->getAttribute('first_name'),
-            'email' => $user->getAttribute('email'),
-            'verified' => $user->hasVerifiedEmail(),
-        ]);
     }
 }

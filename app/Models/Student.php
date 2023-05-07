@@ -45,6 +45,14 @@ class Student extends Model
     ];
 
     /**
+     * @return string
+     */
+    public function getFirstName(): string
+    {
+        return $this->getAttribute('first_name');
+    }
+
+    /**
      * @return BelongsTo
      */
     public function address(): BelongsTo
@@ -71,8 +79,16 @@ class Student extends Model
     /**
      * @return BelongsToMany
      */
+    public function itineraries(): BelongsToMany
+    {
+        return $this->belongsToMany(Itinerary::class)->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany
+     */
     public function trips(): BelongsToMany
     {
-        return $this->belongsToMany(Student::class)->withTimestamps();
+        return $this->belongsToMany(Trip::class)->withTimestamps();
     }
 }

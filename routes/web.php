@@ -18,6 +18,4 @@ Route::get('/', function () {
     return ['Laravel' => app()->version()];
 });
 
-Route::get('/user/state', [UserController::class, 'state']);
-
 require __DIR__.'/auth.php';
