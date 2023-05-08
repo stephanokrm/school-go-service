@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('trips', function (Blueprint $table) {
             $table->id();
-            $table->time('arrive_at');
+            $table->timestamp('arrive_at');
             $table->float('latitude')->nullable();
             $table->float('longitude')->nullable();
             $table->timestamp('started_at')->nullable();

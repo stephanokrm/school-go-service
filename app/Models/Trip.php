@@ -12,6 +12,21 @@ class Trip extends Model
     use HasFactory;
 
     /**
+     * @var string[]
+     */
+    protected $with = [
+        'itinerary',
+    ];
+
+    /**
+     * @return Itinerary
+     */
+    public function getItinerary(): Itinerary
+    {
+        return $this->getAttribute('itinerary');
+    }
+
+    /**
      * @return BelongsTo
      */
     public function itinerary(): BelongsTo

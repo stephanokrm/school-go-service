@@ -44,6 +44,14 @@ class School extends Model
     ];
 
     /**
+     * @return Address
+     */
+    public function getAddress(): Address
+    {
+        return $this->getAttribute('address');
+    }
+
+    /**
      * @return BelongsTo
      */
     public function address(): BelongsTo

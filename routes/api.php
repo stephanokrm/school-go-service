@@ -6,6 +6,7 @@ use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\ResponsibleController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TripController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::apiResource('trip', TripController::class)->only('show');
+
+Route::post('/trip/schedule', [TripController::class, 'schedule'])->middleware('throttle:9999,1');
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/me', [UserController::class, 'me']);
     Route::post('/user/logout', [UserController::class, 'logout']);
@@ -27,6 +32,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['verified'])->group(function () {
         Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
         Route::apiResource('itinerary', ItineraryController::class);
+        Route::apiResource('trip', TripController::class)->except('show');
         Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
         Route::apiResource('responsible', ResponsibleController::class)->only('index', 'store', 'show');
         Route::apiResource('school', SchoolController::class)->only('index', 'store', 'show', 'update');
