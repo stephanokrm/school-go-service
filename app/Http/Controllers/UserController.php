@@ -59,11 +59,11 @@ class UserController extends Controller
     }
 
     /**
-     * @param Request $request
-     * @return mixed
+     * @param User $user
+     * @return bool|null
      */
-    public function logout(Request $request): mixed
+    public function destroy(User $user): ?bool
     {
-        return $request->user()->token()->revoke();
+        return $user->delete();
     }
 }

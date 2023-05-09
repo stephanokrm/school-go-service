@@ -90,10 +90,11 @@ class StudentController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @param Student $student
+     * @return bool|null
      */
-    public function destroy(Student $student)
+    public function destroy(Student $student): ?bool
     {
-        //
+        return $student->delete();
     }
 }

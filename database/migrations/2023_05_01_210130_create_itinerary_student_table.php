@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('itinerary_student', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Itinerary::class)->constrained();
-            $table->foreignIdFor(Student::class)->constrained();
+            $table->foreignIdFor(Itinerary::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Student::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

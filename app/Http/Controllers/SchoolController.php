@@ -114,10 +114,11 @@ class SchoolController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @param School $school
+     * @return bool|null
      */
-    public function destroy(School $school)
+    public function destroy(School $school): ?bool
     {
-        //
+        return $school->delete();
     }
 }

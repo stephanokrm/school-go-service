@@ -71,17 +71,4 @@ class DriverController extends Controller
 
         return new DriverResource($driver);
     }
-
-    /**
-     * @param User $user
-     * @param Driver $driver
-     * @return DriverResource
-     */
-    public function destroy(User $user, Driver $driver): DriverResource
-    {
-        $driver->delete();
-        $user->delete();
-
-        return new DriverResource($driver);
-    }
 }

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->time('afternoon_departure_time')->nullable();
             $table->time('night_entry_time')->nullable();
             $table->time('night_departure_time')->nullable();
-            $table->foreignIdFor(Address::class)->constrained();
+            $table->foreignIdFor(Address::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

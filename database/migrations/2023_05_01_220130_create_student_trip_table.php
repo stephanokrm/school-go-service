@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->timestamp('embarked_at')->nullable();
             $table->timestamp('disembarked_at')->nullable();
-            $table->foreignIdFor(Student::class)->constrained();
-            $table->foreignIdFor(Trip::class)->constrained();
+            $table->foreignIdFor(Student::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Trip::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

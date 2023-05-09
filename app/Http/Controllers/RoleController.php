@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Http\Resources\RoleResource;
 use App\Models\Role;
 
 class RoleController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @return RoleResource
      */
-    public function index()
+    public function index(): RoleResource
     {
-        //
+        return new RoleResource(Role::all());
     }
 
     /**

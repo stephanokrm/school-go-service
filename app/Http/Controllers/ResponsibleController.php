@@ -73,17 +73,4 @@ class ResponsibleController extends Controller
 
         return new ResponsibleResource($responsible);
     }
-
-    /**
-     * @param User $user
-     * @param Responsible $responsible
-     * @return ResponsibleResource
-     */
-    public function destroy(User $user, Responsible $responsible): ResponsibleResource
-    {
-        $responsible->delete();
-        $user->delete();
-
-        return new ResponsibleResource($responsible);
-    }
 }

@@ -23,9 +23,9 @@ return new class extends Migration
             $table->boolean('morning')->default(false);
             $table->boolean('afternoon')->default(false);
             $table->boolean('night')->default(false);
-            $table->foreignIdFor(Address::class)->constrained();
-            $table->foreignIdFor(Responsible::class)->constrained();
-            $table->foreignIdFor(School::class)->constrained();
+            $table->foreignIdFor(Address::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Responsible::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(School::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

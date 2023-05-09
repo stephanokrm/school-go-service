@@ -19,7 +19,7 @@ return new class extends Migration
             $table->float('longitude')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
-            $table->foreignIdFor(Itinerary::class)->constrained();
+            $table->foreignIdFor(Itinerary::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

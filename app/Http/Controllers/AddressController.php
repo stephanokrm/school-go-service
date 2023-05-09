@@ -41,10 +41,11 @@ class AddressController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @param Address $address
+     * @return bool|null
      */
-    public function destroy(Address $address)
+    public function destroy(Address $address): ?bool
     {
-        //
+        return $address->delete();
     }
 }

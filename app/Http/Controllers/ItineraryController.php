@@ -94,10 +94,11 @@ class ItineraryController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @param Itinerary $itinerary
+     * @return bool|null
      */
-    public function destroy(Itinerary $itinerary)
+    public function destroy(Itinerary $itinerary): ?bool
     {
-        //
+        return $itinerary->delete();
     }
 }

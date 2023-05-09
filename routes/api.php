@@ -4,6 +4,7 @@ use App\Http\Controllers\DriverController;
 use App\Http\Controllers\GoogleMapsController;
 use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\ResponsibleController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TripController;
@@ -31,14 +32,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::middleware(['verified'])->group(function () {
         Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
-        Route::apiResource('itinerary', ItineraryController::class);
-        Route::apiResource('trip', TripController::class)->except('show');
         Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
+        Route::apiResource('itinerary', ItineraryController::class);
         Route::apiResource('responsible', ResponsibleController::class)->only('index', 'store', 'show');
-        Route::apiResource('school', SchoolController::class)->only('index', 'store', 'show', 'update');
+        Route::apiResource('role', RoleController::class);
+        Route::apiResource('school', SchoolController::class);
         Route::apiResource('student', StudentController::class);
+        Route::apiResource('trip', TripController::class)->except('show');
         Route::apiResource('user', UserController::class);
-        Route::apiResource('user.driver', DriverController::class)->only('update', 'destroy');
-        Route::apiResource('user.responsible', ResponsibleController::class)->only('update', 'destroy');
+        Route::apiResource('user.driver', DriverController::class)->only('update');
+        Route::apiResource('user.responsible', ResponsibleController::class)->only('update');
     });
 });

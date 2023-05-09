@@ -23,8 +23,8 @@ return new class extends Migration
             $table->boolean('morning')->default(false);
             $table->boolean('afternoon')->default(false);
             $table->boolean('night')->default(false);
-            $table->foreignIdFor(Driver::class)->constrained();
-            $table->foreignIdFor(School::class)->constrained();
+            $table->foreignIdFor(Driver::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(School::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
