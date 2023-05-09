@@ -108,12 +108,21 @@ class TripController extends Controller
                 $this->createTrip(
                     $itinerary,
                     $itinerary->getSchool()->getAttribute('morning_entry_time'),
-                    $itinerary->students()->where('goes', true)->where('morning', true)->get(),
+                    $itinerary
+                        ->students()
+                        ->where('goes', true)
+                        ->where('morning', true)
+                        ->get(),
                 );
                 $this->createTrip(
                     $itinerary,
                     $itinerary->getSchool()->getAttribute('morning_departure_time'),
-                    $itinerary->students()->where('return', true)->where('morning', true)->get(),
+                    $itinerary
+                        ->students()
+                        ->where('return', true)
+                        ->where('morning', true)
+                        ->where('afternoon', false)
+                        ->get(),
                 );
             }
 
@@ -121,12 +130,22 @@ class TripController extends Controller
                 $this->createTrip(
                     $itinerary,
                     $itinerary->getSchool()->getAttribute('afternoon_entry_time'),
-                    $itinerary->students()->where('goes', true)->where('afternoon', true)->get(),
+                    $itinerary
+                        ->students()
+                        ->where('goes', true)
+                        ->where('morning', false)
+                        ->where('afternoon', true)
+                        ->get(),
                 );
                 $this->createTrip(
                     $itinerary,
                     $itinerary->getSchool()->getAttribute('afternoon_departure_time'),
-                    $itinerary->students()->where('return', true)->where('afternoon', true)->get(),
+                    $itinerary
+                        ->students()
+                        ->where('return', true)
+                        ->where('afternoon', true)
+                        ->where('night', false)
+                        ->get(),
                 );
             }
 
@@ -134,12 +153,21 @@ class TripController extends Controller
                 $this->createTrip(
                     $itinerary,
                     $itinerary->getSchool()->getAttribute('night_entry_time'),
-                    $itinerary->students()->where('goes', true)->where('night', true)->get(),
+                    $itinerary
+                        ->students()
+                        ->where('goes', true)
+                        ->where('afternoon', false)
+                        ->where('night', true)
+                        ->get(),
                 );
                 $this->createTrip(
                     $itinerary,
                     $itinerary->getSchool()->getAttribute('night_departure_time'),
-                    $itinerary->students()->where('return', true)->where('night', true)->get(),
+                    $itinerary
+                        ->students()
+                        ->where('return', true)
+                        ->where('night', true)
+                        ->get(),
                 );
             }
         });
