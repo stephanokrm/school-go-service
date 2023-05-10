@@ -29,18 +29,15 @@ Route::post('/trip/schedule', [TripController::class, 'schedule'])->middleware('
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/me', [UserController::class, 'me']);
     Route::post('/user/logout', [UserController::class, 'logout']);
-
-    Route::middleware(['verified'])->group(function () {
-        Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
-        Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
-        Route::apiResource('itinerary', ItineraryController::class);
-        Route::apiResource('responsible', ResponsibleController::class)->only('index', 'store', 'show');
-        Route::apiResource('role', RoleController::class);
-        Route::apiResource('school', SchoolController::class);
-        Route::apiResource('student', StudentController::class);
-        Route::apiResource('trip', TripController::class)->except('show');
-        Route::apiResource('user', UserController::class);
-        Route::apiResource('user.driver', DriverController::class)->only('update');
-        Route::apiResource('user.responsible', ResponsibleController::class)->only('update');
-    });
+    Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
+    Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
+    Route::apiResource('itinerary', ItineraryController::class);
+    Route::apiResource('responsible', ResponsibleController::class)->only('index', 'store', 'show');
+    Route::apiResource('role', RoleController::class);
+    Route::apiResource('school', SchoolController::class);
+    Route::apiResource('student', StudentController::class);
+    Route::apiResource('trip', TripController::class)->except('show');
+    Route::apiResource('user', UserController::class);
+    Route::apiResource('user.driver', DriverController::class)->only('update');
+    Route::apiResource('user.responsible', ResponsibleController::class)->only('update');
 });

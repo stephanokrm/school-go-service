@@ -9,6 +9,7 @@ use App\Models\Itinerary;
 use App\Models\Student;
 use App\Models\Trip;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
@@ -42,24 +43,46 @@ class TripController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @param Request $request
+     * @param Trip $trip
+     * @return JsonResponse
      */
-    public function show(Request $request, Trip $trip)
+    public function show(Request $request, Trip $trip): JsonResponse
     {
-        $origin = $trip->getItinerary()->getSchool()->getAddress()->getAttribute('place_id');
+        $response = \GoogleMaps::load('geocoding')
+            ->setParamByKey('latlng', "{$request->query('latitude')},{$request->query('longitude')}")
+            ->get('results');
 
-        $waypoints = $trip->students()->get()->reduce(function (string $waypoints, Student $student) {
+        dump($response);
+
+        $origin = $trip->getItinerary()->getSchool()->getAddress()->getAttribute('place_id');
+        $students = $trip->students()->get();
+
+        $waypoints = $students->reduce(function (string $waypoints, Student $student) {
             return "{$waypoints}|place_id:{$student->getAddress()->getAttribute('place_id')}";
         }, 'optimize:true');
 
-        return \GoogleMaps::load('directions')
+        $response = \GoogleMaps::load('directions')
             ->setParam([
-                'origin' => 'place_id:ChIJ685WIFYViEgRHlHvBbiD5nE',
+                'origin' => 'place_id:ChIJS2JA5hpwGZUR14U9ZomAohI',
                 'destination' => "place_id:{$origin}",
                 'waypoints' => $waypoints,
                 'provideRouteAlternatives' => false,
                 'travelMode' => 'DRIVING',
             ])->get();
+
+        $response = json_decode($response);
+
+        $waypointOrder = collect($response->routes[0]->waypoint_order)->reduce(function (Collection $orderedStudents, int $index) use ($students) {
+            return $orderedStudents->push($students->get($index));
+        }, collect());
+        $overviewPolyline = $response->routes[0]->overview_polyline->points;
+
+        return response()->json([
+            'trip' => $trip,
+            'students' => $waypointOrder,
+            'polyline' => $overviewPolyline,
+        ]);
     }
 
     /**
@@ -84,6 +107,8 @@ class TripController extends Controller
     public function schedule(): Response
     {
         $today = Carbon::today();
+
+        Trip::query()->whereDate('arrive_at', $today)->delete();
 
         $itineraries = Itinerary::query()
             ->when($today->isMonday(), function (Builder $builder) {
@@ -112,7 +137,7 @@ class TripController extends Controller
                         ->students()
                         ->where('goes', true)
                         ->where('morning', true)
-                        ->get(),
+                        ->pluck('students.id'),
                 );
                 $this->createTrip(
                     $itinerary,
@@ -122,7 +147,7 @@ class TripController extends Controller
                         ->where('return', true)
                         ->where('morning', true)
                         ->where('afternoon', false)
-                        ->get(),
+                        ->pluck('students.id'),
                 );
             }
 
@@ -135,7 +160,7 @@ class TripController extends Controller
                         ->where('goes', true)
                         ->where('morning', false)
                         ->where('afternoon', true)
-                        ->get(),
+                        ->pluck('students.id'),
                 );
                 $this->createTrip(
                     $itinerary,
@@ -145,7 +170,7 @@ class TripController extends Controller
                         ->where('return', true)
                         ->where('afternoon', true)
                         ->where('night', false)
-                        ->get(),
+                        ->pluck('students.id'),
                 );
             }
 
@@ -158,7 +183,7 @@ class TripController extends Controller
                         ->where('goes', true)
                         ->where('afternoon', false)
                         ->where('night', true)
-                        ->get(),
+                        ->pluck('students.id'),
                 );
                 $this->createTrip(
                     $itinerary,
@@ -167,7 +192,7 @@ class TripController extends Controller
                         ->students()
                         ->where('return', true)
                         ->where('night', true)
-                        ->get(),
+                        ->pluck('students.id'),
                 );
             }
         });
@@ -187,16 +212,12 @@ class TripController extends Controller
         Collection $students,
     ): void
     {
-        $arriveAt = Carbon::parse("Today {$time}");
+        if ($students->isEmpty()) return;
 
-        $trip = Trip::query()
-            ->whereDate('arrive_at', $arriveAt)
-            ->where('itinerary_id', $itinerary->getKey())
-            ->firstOrNew();
-
-        $trip->setAttribute('arrive_at', $arriveAt);
+        $trip = new Trip();
+        $trip->setAttribute('arrive_at', Carbon::parse("Today {$time}"));
         $trip->itinerary()->associate($itinerary);
         $trip->save();
-        $trip->students()->sync($students->pluck('id'));
+        $trip->students()->sync($students);
     }
 }
