@@ -14,6 +14,28 @@ class Trip extends Model
     /**
      * @var string[]
      */
+    protected $fillable = [
+        'path',
+        'arrive_at',
+        'latitude',
+        'longitude',
+        'started_at',
+        'finished_at',
+    ];
+
+    /**
+     * @var string[]
+     */
+    protected $casts = [
+        'arrive_at' => 'datetime',
+        'path' => 'array',
+        'latitude' => 'float',
+        'longitude' => 'float',
+    ];
+
+    /**
+     * @var string[]
+     */
     protected $with = [
         'itinerary',
     ];
@@ -39,6 +61,11 @@ class Trip extends Model
      */
     public function students(): BelongsToMany
     {
-        return $this->belongsToMany(Student::class)->withTimestamps();
+        return $this
+            ->belongsToMany(Student::class)
+            ->withPivot('order', 'embarked_at', 'disembarked_at')
+            ->withTimestamps()
+            ->latest('embarked_at')
+            ->orderBy('order');
     }
 }

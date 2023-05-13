@@ -5,15 +5,21 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use App\Http\Resources\StudentResource;
-use App\Models\Address;
 use App\Models\Responsible;
 use App\Models\School;
 use App\Models\Student;
+use App\Services\AddressService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
+    public function __construct(
+        private readonly AddressService $addressService
+    )
+    {
+    }
+
     /**
      * @param Request $request
      * @return StudentResource
@@ -46,9 +52,7 @@ class StudentController extends Controller
         $responsible = Responsible::query()->findOrFail($request->input('responsible.id'));
         $school = School::query()->findOrFail($request->input('school.id'));
 
-        $address = new Address();
-        $address->fill($request->input('address'));
-        $address->save();
+        $address = $this->addressService->store(collect($request->input('address')));
 
         $student = new Student();
         $student->fill($request->all());
@@ -79,8 +83,8 @@ class StudentController extends Controller
         $responsible = Responsible::query()->findOrFail($request->input('responsible.id'));
         $school = School::query()->findOrFail($request->input('school.id'));
 
-        $student->address->fill($request->input('address'));
-        $student->address->save();
+        $this->addressService->update($student->getAddress(), collect($request->input('address')));
+
         $student->fill($student->getFillable());
         $student->responsible()->associate($responsible);
         $student->school()->associate($school);

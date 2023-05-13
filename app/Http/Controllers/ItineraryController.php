@@ -8,12 +8,17 @@ use App\Http\Resources\ItineraryResource;
 use App\Models\Driver;
 use App\Models\Itinerary;
 use App\Models\School;
-use Illuminate\Http\Request;
+use App\Services\AddressService;
 
 class ItineraryController extends Controller
 {
+    public function __construct(
+        private readonly AddressService $addressService
+    )
+    {
+    }
+
     /**
-     * @param Request $request
      * @return ItineraryResource
      */
     public function index(): ItineraryResource
@@ -30,8 +35,11 @@ class ItineraryController extends Controller
         $driver = Driver::query()->findOrFail($request->input('driver.id'));
         $school = School::query()->findOrFail($request->input('school.id'));
 
+        $address = $this->addressService->store(collect($request->input('address')));
+
         $itinerary = new Itinerary();
         $itinerary->fill($request->only($itinerary->getFillable()));
+        $itinerary->address()->associate($address);
         $itinerary->driver()->associate($driver);
         $itinerary->school()->associate($school);
         $itinerary->save();
@@ -58,6 +66,8 @@ class ItineraryController extends Controller
     {
         $driver = Driver::query()->findOrFail($request->input('driver.id'));
         $school = School::query()->findOrFail($request->input('school.id'));
+
+        $this->addressService->update($itinerary->getAddress(), collect($request->input('address')));
 
         $itinerary->fill($request->only($itinerary->getFillable()));
         $itinerary->driver()->associate($driver);

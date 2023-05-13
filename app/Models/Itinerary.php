@@ -43,9 +43,34 @@ class Itinerary extends Model
      * @var string[]
      */
     protected $with = [
+        'address',
         'driver',
         'school',
     ];
+
+    /**
+     * @return Address
+     */
+    public function getAddress(): Address
+    {
+        return $this->getAttribute('address');
+    }
+
+    /**
+     * @return Driver
+     */
+    public function getDriver(): Driver
+    {
+        return $this->getAttribute('driver');
+    }
+
+    /**
+     * @return School
+     */
+    public function getSchool(): School
+    {
+        return $this->getAttribute('school');
+    }
 
     /**
      * @return BelongsTo
@@ -64,26 +89,18 @@ class Itinerary extends Model
     }
 
     /**
+     * @return BelongsTo
+     */
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class);
+    }
+
+    /**
      * @return BelongsToMany
      */
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(Student::class)->withTimestamps();
-    }
-
-    /**
-     * @return Driver
-     */
-    public function getDriver(): Driver
-    {
-        return $this->getAttribute('driver');
-    }
-
-    /**
-     * @return School
-     */
-    public function getSchool(): School
-    {
-        return $this->getAttribute('school');
     }
 }

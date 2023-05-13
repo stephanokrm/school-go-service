@@ -33,10 +33,10 @@ class DriverController extends Controller
      */
     public function store(StoreDriverRequest $request): DriverResource
     {
-        $roles = Role::query()->where('role', RoleEnum::Driver->value)->pluck('id');
+        $role = Role::query()->where('role', RoleEnum::Driver->value)->first();
 
         $user = $this->userService->store($request, collect($request->input('user')));
-        $user->roles()->sync($roles);
+        $user->roles()->attach($role->getKey());
 
         $driver = new Driver();
         $driver->fill($request->only($driver->getFillable()));

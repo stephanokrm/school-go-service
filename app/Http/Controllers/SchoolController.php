@@ -5,11 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSchoolRequest;
 use App\Http\Requests\UpdateSchoolRequest;
 use App\Http\Resources\SchoolResource;
-use App\Models\Address;
 use App\Models\School;
+use App\Services\AddressService;
 
 class SchoolController extends Controller
 {
+    public function __construct(
+        private readonly AddressService $addressService
+    )
+    {
+    }
+
     /**
      * @return SchoolResource
      */
@@ -24,12 +30,10 @@ class SchoolController extends Controller
      */
     public function store(StoreSchoolRequest $request): SchoolResource
     {
-        $address = new Address();
-        $address->fill($request->input('address'));
-        $address->save();
+        $address = $this->addressService->store(collect($request->input('address')));
 
         $school = new School();
-        $school->fill($request->all());
+        $school->fill($request->only($school->getFillable()));
 
         $request->whenFilled('morning', function ($morning) use ($request, $school) {
             if (!$morning) return;
@@ -64,7 +68,7 @@ class SchoolController extends Controller
      */
     public function show(School $school): SchoolResource
     {
-        return new SchoolResource($school->load('address'));
+        return new SchoolResource($school);
     }
 
     /**
@@ -74,9 +78,9 @@ class SchoolController extends Controller
      */
     public function update(UpdateSchoolRequest $request, School $school): SchoolResource
     {
-        $school->address->fill($request->input('address'));
-        $school->address->save();
-        $school->fill($request->except('address'));
+        $this->addressService->update($school->getAddress(), collect($request->input('address')));
+
+        $school->fill($request->only($school->getFillable()));
 
         $request->whenFilled('morning', function ($morning) use ($request, $school) {
             if ($morning) {

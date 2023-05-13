@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::apiResource('trip', TripController::class)->only('show');
+
 
 Route::post('/trip/schedule', [TripController::class, 'schedule'])->middleware('throttle:9999,1');
 
@@ -36,7 +36,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('role', RoleController::class);
     Route::apiResource('school', SchoolController::class);
     Route::apiResource('student', StudentController::class);
-    Route::apiResource('trip', TripController::class)->except('show');
+    Route::apiResource('trip', TripController::class);
     Route::apiResource('user', UserController::class);
     Route::apiResource('user.driver', DriverController::class)->only('update');
     Route::apiResource('user.responsible', ResponsibleController::class)->only('update');

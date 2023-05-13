@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Address;
 use App\Models\Driver;
 use App\Models\School;
 use Illuminate\Database\Migrations\Migration;
@@ -25,6 +26,7 @@ return new class extends Migration
             $table->boolean('night')->default(false);
             $table->foreignIdFor(Driver::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(School::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Address::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -7,22 +7,25 @@ use Illuminate\Foundation\Http\FormRequest;
 class UpdateTripRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * @return bool
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
+     * @return array[]
      */
     public function rules(): array
     {
         return [
-            //
+            'path' => ['required', 'array'],
+            'arrive_at' => ['required', 'date'],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
+            'started_at' => ['nullable', 'date'],
+            'finished_at' => ['nullable', 'date'],
         ];
     }
 }

@@ -36,10 +36,10 @@ class ResponsibleController extends Controller
      */
     public function store(StoreResponsibleRequest $request): ResponsibleResource
     {
-        $roles = Role::query()->where('role', RoleEnum::Responsible->value)->pluck('id');
+        $role = Role::query()->where('role', RoleEnum::Responsible->value)->first();
 
         $user = $this->userService->store($request, collect($request->input('user')));
-        $user->roles()->sync($roles);
+        $user->roles()->attach($role->getKey());
 
         $responsible = new Responsible();
         $responsible->fill($request->except('user'));
