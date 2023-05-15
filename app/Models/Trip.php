@@ -28,9 +28,11 @@ class Trip extends Model
      */
     protected $casts = [
         'arrive_at' => 'datetime',
-        'path' => 'array',
+        'finished_at' => 'datetime',
         'latitude' => 'float',
         'longitude' => 'float',
+        'path' => 'array',
+        'started_at' => 'datetime',
     ];
 
     /**

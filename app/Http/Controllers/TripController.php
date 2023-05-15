@@ -28,6 +28,7 @@ class TripController extends Controller
             })
             ->whereDate('arrive_at', Carbon::today())
             ->oldest('arrive_at')
+            ->oldest('finished_at')
             ->get();
 
         return new TripResource($trips);
