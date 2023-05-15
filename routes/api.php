@@ -30,6 +30,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/me', [UserController::class, 'me']);
     Route::post('/user/logout', [UserController::class, 'logout']);
     Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
+    Route::get('/student/{student}/trip', [StudentController::class, 'trips']);
+
     Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
     Route::apiResource('itinerary', ItineraryController::class);
     Route::apiResource('responsible', ResponsibleController::class)->only('index', 'store', 'show');

@@ -11,6 +11,7 @@ use App\Models\Student;
 use App\Services\AddressService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class StudentController extends Controller
 {
@@ -100,5 +101,18 @@ class StudentController extends Controller
     public function destroy(Student $student): ?bool
     {
         return $student->delete();
+    }
+
+    /**
+     * @param Request $request
+     * @return StudentResource
+     */
+    public function trips(Request $request): StudentResource {
+        $students = Student::query()
+            ->where('responsible_id', $request->user()->responsible->id)
+            ->whereRelation('trips', 'arrive_at', Carbon::today())
+            ->get();
+
+        return new StudentResource($students);
     }
 }
