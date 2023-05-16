@@ -22,6 +22,7 @@ class Trip extends Model
         'longitude',
         'started_at',
         'finished_at',
+        'round',
     ];
 
     /**
@@ -34,6 +35,7 @@ class Trip extends Model
         'longitude' => 'float',
         'path' => 'array',
         'started_at' => 'datetime',
+        'round' => 'boolean',
     ];
 
     /**

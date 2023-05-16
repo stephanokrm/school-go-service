@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->json('path');
             $table->timestamp('arrive_at');
+            $table->boolean('round')->default(false);
             $table->float('latitude')->nullable();
             $table->float('longitude')->nullable();
             $table->timestamp('started_at')->nullable();

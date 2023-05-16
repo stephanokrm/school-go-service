@@ -134,6 +134,7 @@ class TripController extends Controller
                         ->where('goes', true)
                         ->where('morning', true)
                         ->get(),
+                    false
                 );
                 $this->createTrip(
                     $itinerary,
@@ -144,6 +145,7 @@ class TripController extends Controller
                         ->where('morning', true)
                         ->where('afternoon', false)
                         ->get(),
+                    true
                 );
             }
 
@@ -157,6 +159,7 @@ class TripController extends Controller
                         ->where('morning', false)
                         ->where('afternoon', true)
                         ->get(),
+                    false
                 );
                 $this->createTrip(
                     $itinerary,
@@ -167,6 +170,7 @@ class TripController extends Controller
                         ->where('afternoon', true)
                         ->where('night', false)
                         ->get(),
+                    true
                 );
             }
 
@@ -180,6 +184,7 @@ class TripController extends Controller
                         ->where('afternoon', false)
                         ->where('night', true)
                         ->get(),
+                    false
                 );
                 $this->createTrip(
                     $itinerary,
@@ -189,6 +194,7 @@ class TripController extends Controller
                         ->where('return', true)
                         ->where('night', true)
                         ->get(),
+                    true
                 );
             }
         });
@@ -200,12 +206,14 @@ class TripController extends Controller
      * @param Itinerary $itinerary
      * @param string $time
      * @param Collection $students
+     * @param bool $round
      * @return void
      */
     private function createTrip(
         Itinerary  $itinerary,
         string     $time,
         Collection $students,
+        bool       $round
     ): void
     {
         if ($students->isEmpty()) return;
@@ -239,6 +247,7 @@ class TripController extends Controller
         $trip = new Trip();
         $trip->setAttribute('arrive_at', $arriveAt);
         $trip->setAttribute('path', $path);
+        $trip->setAttribute('round', $round);
         $trip->itinerary()->associate($itinerary);
         $trip->save();
         $trip->students()->sync($orderedStudents);
