@@ -63,7 +63,15 @@ class TripController extends Controller
         $trip->fill($request->only($trip->getFillable()));
         $trip->save();
 
-        if ($trip->wasChanged('finished_at')) {
+        if ($trip->wasChanged('started_at') && $trip->getAttribute('round')) {
+            $trip->students()->update(['embarked_at' => Carbon::now()]);
+            $trip->getStudents()->each(function (Student $student) {
+                $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
+            });
+        }
+
+        if ($trip->wasChanged('finished_at') && !$trip->getAttribute('round')) {
+            $trip->students()->update(['disembarked_at' => Carbon::now()]);
             $trip->getStudents()->each(function (Student $student) {
                 $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
             });
@@ -73,18 +81,33 @@ class TripController extends Controller
     }
 
     /**
-     * @param Request $request
      * @param Trip $trip
      * @param Student $student
      * @return TripResource
      */
-    public function embark(Request $request, Trip $trip, Student $student): TripResource
+    public function embark(Trip $trip, Student $student): TripResource
     {
         $trip->students()->updateExistingPivot($student->getKey(), [
-            'embarked_at' => $request->input('embarked_at'),
+            'embarked_at' => Carbon::now(),
         ]);
 
         $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
+
+        return new TripResource($trip);
+    }
+
+    /**
+     * @param Trip $trip
+     * @param Student $student
+     * @return TripResource
+     */
+    public function disembark(Trip $trip, Student $student): TripResource
+    {
+        $trip->students()->updateExistingPivot($student->getKey(), [
+            'disembarked_at' => Carbon::now(),
+        ]);
+
+        $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
 
         return new TripResource($trip);
     }
@@ -219,8 +242,10 @@ class TripController extends Controller
         if ($students->isEmpty()) return;
 
         $arriveAt = Carbon::parse("Today {$time}");
-        $origin = $itinerary->getAddress()->getAttribute('place_id');
-        $destination = $itinerary->getSchool()->getAddress()->getAttribute('place_id');
+        $itineraryAddress = $itinerary->getAddress()->getAttribute('place_id');
+        $schoolAddress = $itinerary->getSchool()->getAddress()->getAttribute('place_id');
+        $origin = $round ? $schoolAddress : $itineraryAddress;
+        $destination = $round ? $itineraryAddress : $schoolAddress;
         $waypoints = $students->reduce(function (string $waypoints, Student $student) {
             return "{$waypoints}|place_id:{$student->getAddress()->getAttribute('place_id')}";
         }, 'optimize:true');
