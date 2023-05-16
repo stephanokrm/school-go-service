@@ -8,6 +8,8 @@ use App\Http\Resources\TripResource;
 use App\Models\Itinerary;
 use App\Models\Student;
 use App\Models\Trip;
+use App\Notifications\DisembarkedNotification;
+use App\Notifications\EmbarkedNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -58,13 +60,31 @@ class TripController extends Controller
      */
     public function update(UpdateTripRequest $request, Trip $trip): TripResource
     {
-        $students = collect($request->input('students'))->reduce(function (Collection $students, $student) {
-            return $students->put($student['id'], $student['pivot']);
-        }, collect());
-
         $trip->fill($request->only($trip->getFillable()));
-        $trip->students()->sync($students);
         $trip->save();
+
+        if ($trip->wasChanged('finished_at')) {
+            $trip->getStudents()->each(function (Student $student) {
+                $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
+            });
+        }
+
+        return new TripResource($trip);
+    }
+
+    /**
+     * @param Request $request
+     * @param Trip $trip
+     * @param Student $student
+     * @return TripResource
+     */
+    public function embark(Request $request, Trip $trip, Student $student): TripResource
+    {
+        $trip->students()->updateExistingPivot($student->getKey(), [
+            'embarked_at' => $request->input('embarked_at'),
+        ]);
+
+        $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
 
         return new TripResource($trip);
     }

@@ -18,6 +18,14 @@ class Responsible extends Model
     ];
 
     /**
+     * @return User
+     */
+    public function getUser(): User
+    {
+        return $this->getAttribute('user');
+    }
+
+    /**
      * @return BelongsTo
      */
     public function user(): BelongsTo

@@ -61,6 +61,14 @@ class Student extends Model
     }
 
     /**
+     * @return Responsible
+     */
+    public function getResponsible(): Responsible
+    {
+        return $this->getAttribute('responsible');
+    }
+
+    /**
      * @return BelongsTo
      */
     public function address(): BelongsTo

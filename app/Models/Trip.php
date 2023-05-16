@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 
 class Trip extends Model
 {
@@ -48,6 +49,14 @@ class Trip extends Model
     public function getItinerary(): Itinerary
     {
         return $this->getAttribute('itinerary');
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getStudents(): Collection
+    {
+        return $this->getAttribute('students');
     }
 
     /**

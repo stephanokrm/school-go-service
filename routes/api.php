@@ -29,8 +29,8 @@ Route::post('/trip/schedule', [TripController::class, 'schedule'])->middleware('
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/me', [UserController::class, 'me']);
     Route::post('/user/logout', [UserController::class, 'logout']);
+    Route::put('/trip/{trip}/student/{student}/embark', [TripController::class, 'embark']);
     Route::get('/maps/autocomplete', [GoogleMapsController::class, 'autocomplete']);
-    Route::get('/student/{student}/trip', [StudentController::class, 'trips']);
 
     Route::apiResource('driver', DriverController::class)->only('index', 'store', 'show');
     Route::apiResource('itinerary', ItineraryController::class);
