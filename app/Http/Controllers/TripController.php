@@ -103,6 +103,8 @@ class TripController extends Controller
 
         $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
 
+        $this->updateTrip($trip, $student->getAddress()->getAttribute('place_id'));
+
         return new TripResource($trip);
     }
 
@@ -118,6 +120,8 @@ class TripController extends Controller
         ]);
 
         $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
+
+        $this->updateTrip($trip, $student->getAddress()->getAttribute('place_id'));
 
         return new TripResource($trip);
     }
@@ -135,8 +139,11 @@ class TripController extends Controller
 
         $trip->getItinerary()->getDriver()->getUser()->notify(new AbsentNotification($student));
 
+        $this->updateTrip($trip);
+
         return new TripResource($trip);
     }
+
     /**
      * @param Trip $trip
      * @param Student $student
@@ -149,6 +156,8 @@ class TripController extends Controller
         ]);
 
         $trip->getItinerary()->getDriver()->getUser()->notify(new PresentNotification($student));
+
+        $this->updateTrip($trip);
 
         return new TripResource($trip);
     }
@@ -318,5 +327,49 @@ class TripController extends Controller
         $trip->itinerary()->associate($itinerary);
         $trip->save();
         $trip->students()->sync($orderedStudents);
+    }
+
+    /**
+     * @param Trip $trip
+     * @param string|null $originAddress
+     * @return void
+     */
+    private function updateTrip(
+        Trip    $trip,
+        ?string $originAddress = null
+    ): void
+    {
+        $itineraryAddress = $trip->getItinerary()->getAddress()->getAttribute('place_id');
+        $schoolAddress = $trip->getItinerary()->getSchool()->getAddress()->getAttribute('place_id');
+        $origin = $originAddress ?? $trip->getAttribute('round') ? $schoolAddress : $itineraryAddress;
+        $destination = $trip->getAttribute('round') ? $itineraryAddress : $schoolAddress;
+        $waypoints = $trip
+            ->getStudents()
+            ->when($trip->getAttribute('round'), function (Collection $students) {
+                return $students->whereNull('pivot.disembarked_at');
+            })
+            ->when(!$trip->getAttribute('round'), function (Collection $students) {
+                return $students->whereNull('pivot.embarked_at');
+            })
+            ->reduce(function (string $waypoints, Student $student) {
+                return "{$waypoints}|place_id:{$student->getAddress()->getAttribute('place_id')}";
+            }, 'optimize:true');
+
+        $response = \GoogleMaps::load('directions')
+            ->setParam([
+                'origin' => "place_id:{$origin}",
+                'destination' => "place_id:{$destination}",
+                'waypoints' => $waypoints,
+                'alternatives' => false,
+                'driving' => 'driving',
+                'arrival_time' => $trip->getAttribute('arrive_at')->getTimestamp(),
+            ])->get();
+
+        $response = json_decode($response);
+
+        $path = $response->routes[0]->overview_polyline->points;
+
+        $trip->setAttribute('path', $path);
+        $trip->save();
     }
 }
