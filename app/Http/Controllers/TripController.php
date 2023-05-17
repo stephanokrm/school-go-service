@@ -64,14 +64,14 @@ class TripController extends Controller
         $trip->save();
 
         if ($trip->wasChanged('started_at') && $trip->getAttribute('round')) {
-            $trip->students()->update(['embarked_at' => Carbon::now()]);
+            $trip->students()->newPivotStatement()->update(['embarked_at' => Carbon::now()]);
             $trip->getStudents()->each(function (Student $student) {
                 $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
             });
         }
 
         if ($trip->wasChanged('finished_at') && !$trip->getAttribute('round')) {
-            $trip->students()->update(['disembarked_at' => Carbon::now()]);
+            $trip->students()->newPivotStatement()->update(['disembarked_at' => Carbon::now()]);
             $trip->getStudents()->each(function (Student $student) {
                 $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
             });
