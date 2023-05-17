@@ -25,6 +25,13 @@ class Driver extends Model
         'user',
     ];
 
+    /**
+     * @return User
+     */
+    public function getUser(): User
+    {
+        return $this->getAttribute('user');
+    }
 
     /**
      * @return BelongsTo

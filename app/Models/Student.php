@@ -105,6 +105,9 @@ class Student extends Model
      */
     public function trips(): BelongsToMany
     {
-        return $this->belongsToMany(Trip::class)->withTimestamps();
+        return $this
+            ->belongsToMany(Trip::class)
+            ->withPivot('order', 'absent', 'embarked_at', 'disembarked_at')
+            ->withTimestamps();
     }
 }

@@ -8,8 +8,10 @@ use App\Http\Resources\TripResource;
 use App\Models\Itinerary;
 use App\Models\Student;
 use App\Models\Trip;
+use App\Notifications\AbsentNotification;
 use App\Notifications\DisembarkedNotification;
 use App\Notifications\EmbarkedNotification;
+use App\Notifications\PresentNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -119,6 +121,38 @@ class TripController extends Controller
 
         return new TripResource($trip);
     }
+
+    /**
+     * @param Trip $trip
+     * @param Student $student
+     * @return TripResource
+     */
+    public function absent(Trip $trip, Student $student): TripResource
+    {
+        $trip->students()->updateExistingPivot($student->getKey(), [
+            'absent' => true,
+        ]);
+
+        $trip->getItinerary()->getDriver()->getUser()->notify(new AbsentNotification($student));
+
+        return new TripResource($trip);
+    }
+    /**
+     * @param Trip $trip
+     * @param Student $student
+     * @return TripResource
+     */
+    public function present(Trip $trip, Student $student): TripResource
+    {
+        $trip->students()->updateExistingPivot($student->getKey(), [
+            'absent' => false,
+        ]);
+
+        $trip->getItinerary()->getDriver()->getUser()->notify(new PresentNotification($student));
+
+        return new TripResource($trip);
+    }
+
 
     /**
      * Remove the specified resource from storage.
