@@ -16,7 +16,7 @@ class GoogleMapsController extends Controller
             ->setParamByKey('input', $request->query('input'))
             ->setParamByKey('language', 'pt-BR')
             ->setParamByKey('components', 'country:br')
-            ->setParamByKey('types', 'geocode')
+            ->setParamByKey('types', 'address')
             ->getResponseByKey('predictions');
     }
 }

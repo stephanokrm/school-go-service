@@ -12,11 +12,11 @@ use App\Notifications\AbsentNotification;
 use App\Notifications\DisembarkedNotification;
 use App\Notifications\EmbarkedNotification;
 use App\Notifications\PresentNotification;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 class TripController extends Controller
 {
@@ -101,9 +101,9 @@ class TripController extends Controller
             'embarked_at' => Carbon::now(),
         ]);
 
-        $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
-
         $this->updateTrip($trip, $student->getAddress()->getAttribute('place_id'));
+
+        $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
 
         return new TripResource($trip);
     }
@@ -119,9 +119,9 @@ class TripController extends Controller
             'disembarked_at' => Carbon::now(),
         ]);
 
-        $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
-
         $this->updateTrip($trip, $student->getAddress()->getAttribute('place_id'));
+
+        $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
 
         return new TripResource($trip);
     }
@@ -137,9 +137,9 @@ class TripController extends Controller
             'absent' => true,
         ]);
 
-        $trip->getItinerary()->getDriver()->getUser()->notify(new AbsentNotification($student));
-
         $this->updateTrip($trip);
+
+        $trip->getItinerary()->getDriver()->getUser()->notify(new AbsentNotification($student));
 
         return new TripResource($trip);
     }
@@ -155,13 +155,12 @@ class TripController extends Controller
             'absent' => false,
         ]);
 
-        $trip->getItinerary()->getDriver()->getUser()->notify(new PresentNotification($student));
-
         $this->updateTrip($trip);
+
+        $trip->getItinerary()->getDriver()->getUser()->notify(new PresentNotification($student));
 
         return new TripResource($trip);
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -349,28 +348,30 @@ class TripController extends Controller
         }
 
         $destination = $trip->getAttribute('round') ? $itineraryAddress : $schoolAddress;
-        $waypoints = $trip
-            ->getStudents()
-            ->when($trip->getAttribute('round'), function (Collection $students) {
-                return $students->whereNull('pivot.disembarked_at');
+        $students = $trip
+            ->students()
+            ->when($trip->getAttribute('round'), function (Builder $query) {
+                $query->whereNull('student_trip.disembarked_at');
             })
-            ->when(!$trip->getAttribute('round'), function (Collection $students) {
-                return $students->whereNull('pivot.embarked_at');
+            ->when(!$trip->getAttribute('round'), function (Builder $query) {
+                $query->whereNull('student_trip.embarked_at');
             })
-            ->reduce(function (string $waypoints, Student $student) {
-                return "{$waypoints}|place_id:{$student->getAddress()->getAttribute('place_id')}";
-            }, 'optimize:true');
+            ->get();
 
-        $response = \GoogleMaps::load('directions')
-            ->setParam([
-                'origin' => "place_id:{$origin}",
-                'destination' => "place_id:{$destination}",
-                'waypoints' => $waypoints,
-                'alternatives' => false,
-                'driving' => 'driving',
-                'arrival_time' => $trip->getAttribute('arrive_at')->getTimestamp(),
-            ])->get();
+        $waypoints = $students->isEmpty() ? null : $students->reduce(function (string $waypoints, Student $student) {
+            return "{$waypoints}|place_id:{$student->getAddress()->getAttribute('place_id')}";
+        }, 'optimize:true');
 
+        $params = [
+            'origin' => "place_id:{$origin}",
+            'destination' => "place_id:{$destination}",
+            'waypoints' => $waypoints,
+            'alternatives' => false,
+            'driving' => 'driving',
+            'arrival_time' => $trip->getAttribute('arrive_at')->getTimestamp(),
+        ];
+
+        $response = \GoogleMaps::load('directions')->setParam($params)->get();
         $response = json_decode($response);
 
         $path = $response->routes[0]->overview_polyline->points;
