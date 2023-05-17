@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TripUpdated;
 use App\Http\Requests\StoreItineraryRequest;
 use App\Http\Requests\UpdateItineraryRequest;
 use App\Http\Resources\ItineraryResource;
 use App\Models\Driver;
 use App\Models\Itinerary;
 use App\Models\School;
+use App\Models\Trip;
 use App\Services\AddressService;
+use Illuminate\Support\Collection;
 
 class ItineraryController extends Controller
 {
@@ -73,7 +76,31 @@ class ItineraryController extends Controller
         $itinerary->driver()->associate($driver);
         $itinerary->school()->associate($school);
         $itinerary->save();
-        $itinerary->students()->sync(collect($request->input('students'))->pluck('id'));
+
+        $changes = $itinerary->students()->sync(collect($request->input('students'))->pluck('id'));
+
+        $attached = collect($changes['attached']);
+        $detached = collect($changes['detached']);
+
+        if ($attached->isNotEmpty() || $detached->isNotEmpty()) {
+            $itinerary
+                ->trips()
+                ->whereNull('finished_at')
+                ->get()
+                ->when($attached->isNotEmpty(), function (Collection $trips) use ($attached) {
+                    $trips->each(function (Trip $trip) use ($attached) {
+                        $trip->students()->attach($attached);
+                    });
+                })
+                ->when($detached->isNotEmpty(), function (Collection $trips) use ($detached) {
+                    $trips->each(function (Trip $trip) use ($detached) {
+                        $trip->students()->detach($detached);
+                    });
+                })
+                ->each(function (Trip $trip) {
+                    event(new TripUpdated($trip));
+                });
+        }
 
         return new ItineraryResource($itinerary);
     }

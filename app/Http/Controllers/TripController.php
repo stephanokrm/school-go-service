@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TripUpdated;
 use App\Http\Requests\StoreTripRequest;
 use App\Http\Requests\UpdateTripRequest;
 use App\Http\Resources\TripResource;
@@ -101,7 +102,10 @@ class TripController extends Controller
             'embarked_at' => Carbon::now(),
         ]);
 
-        $this->updateTrip($trip, $student->getAddress()->getAttribute('place_id'));
+        $event = new TripUpdated($trip);
+        $event->setOrigin($student->getAddress()->getAttribute('place_id'));
+
+        event($event);
 
         $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
 
@@ -119,7 +123,10 @@ class TripController extends Controller
             'disembarked_at' => Carbon::now(),
         ]);
 
-        $this->updateTrip($trip, $student->getAddress()->getAttribute('place_id'));
+        $event = new TripUpdated($trip);
+        $event->setOrigin($student->getAddress()->getAttribute('place_id'));
+
+        event($event);
 
         $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
 
@@ -137,7 +144,7 @@ class TripController extends Controller
             'absent' => true,
         ]);
 
-        $this->updateTrip($trip);
+        event(new TripUpdated($trip));
 
         $trip->getItinerary()->getDriver()->getUser()->notify(new AbsentNotification($student));
 
@@ -155,7 +162,7 @@ class TripController extends Controller
             'absent' => false,
         ]);
 
-        $this->updateTrip($trip);
+        event(new TripUpdated($trip));
 
         $trip->getItinerary()->getDriver()->getUser()->notify(new PresentNotification($student));
 
@@ -306,8 +313,8 @@ class TripController extends Controller
                 'destination' => "place_id:{$destination}",
                 'waypoints' => $waypoints,
                 'alternatives' => false,
-                'driving' => 'driving',
-                'arrival_time' => $arriveAt->getTimestamp(),
+                'mode' => 'driving',
+                'arrival_time' => $arriveAt->getTimestampMs(),
             ])->get();
 
         $response = json_decode($response);
@@ -326,57 +333,5 @@ class TripController extends Controller
         $trip->itinerary()->associate($itinerary);
         $trip->save();
         $trip->students()->sync($orderedStudents);
-    }
-
-    /**
-     * @param Trip $trip
-     * @param string|null $originAddress
-     * @return void
-     */
-    private function updateTrip(
-        Trip    $trip,
-        ?string $originAddress = null
-    ): void
-    {
-        $itineraryAddress = $trip->getItinerary()->getAddress()->getAttribute('place_id');
-        $schoolAddress = $trip->getItinerary()->getSchool()->getAddress()->getAttribute('place_id');
-
-        if ($originAddress) {
-            $origin = $originAddress;
-        } else {
-            $origin = $trip->getAttribute('round') ? $schoolAddress : $itineraryAddress;
-        }
-
-        $destination = $trip->getAttribute('round') ? $itineraryAddress : $schoolAddress;
-        $students = $trip
-            ->students()
-            ->when($trip->getAttribute('round'), function (Builder $query) {
-                $query->whereNull('student_trip.disembarked_at');
-            })
-            ->when(!$trip->getAttribute('round'), function (Builder $query) {
-                $query->whereNull('student_trip.embarked_at');
-            })
-            ->get();
-
-        $waypoints = $students->isEmpty() ? null : $students->reduce(function (string $waypoints, Student $student) {
-            return "{$waypoints}|place_id:{$student->getAddress()->getAttribute('place_id')}";
-        }, 'optimize:true');
-
-        $params = [
-            'origin' => "place_id:{$origin}",
-            'destination' => "place_id:{$destination}",
-            'waypoints' => $waypoints,
-            'alternatives' => false,
-            'driving' => 'driving',
-            'arrival_time' => $trip->getAttribute('arrive_at')->getTimestamp(),
-        ];
-
-        $response = \GoogleMaps::load('directions')->setParam($params)->get();
-        $response = json_decode($response);
-
-        $path = $response->routes[0]->overview_polyline->points;
-
-        $trip->setAttribute('path', $path);
-        $trip->save();
     }
 }
