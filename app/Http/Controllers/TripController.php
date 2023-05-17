@@ -341,7 +341,13 @@ class TripController extends Controller
     {
         $itineraryAddress = $trip->getItinerary()->getAddress()->getAttribute('place_id');
         $schoolAddress = $trip->getItinerary()->getSchool()->getAddress()->getAttribute('place_id');
-        $origin = $originAddress ?? $trip->getAttribute('round') ? $schoolAddress : $itineraryAddress;
+
+        if ($originAddress) {
+            $origin = $originAddress;
+        } else {
+            $origin = $trip->getAttribute('round') ? $schoolAddress : $itineraryAddress;
+        }
+
         $destination = $trip->getAttribute('round') ? $itineraryAddress : $schoolAddress;
         $waypoints = $trip
             ->getStudents()
