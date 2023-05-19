@@ -28,6 +28,15 @@ class UpdateTripPath
         }
 
         $destinationPlaceId = $trip->getAttribute('round') ? $itineraryAddressPlaceId : $schoolAddressPlaceId;
+        $completed = $trip
+            ->students()
+            ->when($trip->getAttribute('round'), function (Builder $query) {
+                $query->whereNotNull('student_trip.disembarked_at');
+            })
+            ->when(!$trip->getAttribute('round'), function (Builder $query) {
+                $query->whereNotNull('student_trip.embarked_at');
+            })
+            ->count();
         $students = $trip
             ->students()
             ->when($trip->getAttribute('round'), function (Builder $query) {
@@ -56,15 +65,17 @@ class UpdateTripPath
 
         $route = $response->routes[0];
 
-        $path = $route->overview_polyline->points;
-        $waypointOrder = $route->waypoint_order;
-
-        $orderedStudents = collect($waypointOrder)->reduce(function (Collection $orderedStudents, int $index, int $order) use ($students) {
-            return $orderedStudents->put($students->get($index)->getKey(), ['order' => $order + 1]);
-        }, collect())->all();
-
-        $trip->setAttribute('path', $path);
+        $trip->setAttribute('path', $route->overview_polyline->points);
         $trip->save();
-        $trip->students()->sync($orderedStudents);
+
+        if ($students->isNotEmpty()) {
+            $orderedStudents = collect($route->waypoint_order)
+                ->reduce(function (Collection $orderedStudents, int $index, int $order) use ($completed, $students) {
+                    return $orderedStudents->put($students->get($index)->getKey(), ['order' => $completed + $order + 1]);
+                }, collect())
+                ->all();
+
+            $trip->students()->syncWithoutDetaching($orderedStudents);
+        }
     }
 }

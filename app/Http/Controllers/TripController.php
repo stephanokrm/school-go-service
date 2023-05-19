@@ -184,7 +184,9 @@ class TripController extends Controller
     {
         $today = Carbon::today();
 
-        Trip::query()->whereDate('arrive_at', $today)->delete();
+        Trip::query()
+            ->whereDate('arrive_at', $today)
+            ->delete();
 
         $itineraries = Itinerary::query()
             ->when($today->isMonday(), function (Builder $builder) {
