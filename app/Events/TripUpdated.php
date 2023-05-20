@@ -17,7 +17,7 @@ class TripUpdated
     /**
      * @var string|null
      */
-    private ?string $origin;
+    private ?string $origin = null;
 
     /**
      * @param Trip $trip

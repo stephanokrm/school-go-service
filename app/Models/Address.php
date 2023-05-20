@@ -25,6 +25,8 @@ class Address extends Model
         'morning' => 'boolean',
         'afternoon' => 'boolean',
         'night' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     /**
