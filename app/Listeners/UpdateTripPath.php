@@ -58,6 +58,7 @@ class UpdateTripPath
             'alternatives' => false,
             'mode' => 'driving',
             'arrival_time' => $trip->getAttribute('arrive_at')->getTimestampMs(),
+            'language' => 'pt-BR'
         ];
 
         $response = \GoogleMaps::load('directions')->setParam($params)->get();

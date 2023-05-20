@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -14,11 +16,14 @@ class UserService
     /**
      * @param StoreUserRequest $request
      * @param Collection $attributes
-     * @return User
+     * @return Builder|Model
      */
-    public function store(StoreUserRequest $request, Collection $attributes): User
+    public function store(StoreUserRequest $request, Collection $attributes): Builder|Model
     {
-        $user = new User();
+        $user = User::query()
+            ->where('email', $attributes->get('email'))
+            ->where('cell_phone', $attributes->get('cell_phone'))
+            ->firstOrNew();
         $user->fill($attributes->all());
 
         $request->whenFilled('password', function ($password) use ($user) {
