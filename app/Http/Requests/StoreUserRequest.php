@@ -24,9 +24,9 @@ class StoreUserRequest extends FormRequest
         return [
             'first_name' => ['required', 'max:255'],
             'last_name' => ['required', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
+            'email' => ['required', 'email', 'max:255'],
             'password' => ['sometimes', 'confirmed', Password::default()],
-            'cell_phone' => ['required', Rule::phone()->country(['BR'])->type('mobile'), Rule::unique('users', 'cell_phone')],
+            'cell_phone' => ['required', Rule::phone()->country(['BR'])->type('mobile')],
         ];
     }
 }

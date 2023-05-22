@@ -19,11 +19,12 @@ class StoreDriverRequest extends StoreUserRequest
      */
     public function rules(): array
     {
+        $rules = collect(parent::rules())->mapWithKeys(function (array $rules, string $field) {
+            return ["user.{$field}" => $rules];
+        });
+
         return [
-            'user.first_name' => ['required', 'max:255'],
-            'user.last_name' => ['required', 'max:255'],
-            'user.email' => ['required', 'email', 'max:255'],
-            'user.cell_phone' => ['required', Rule::phone()->country(['BR'])->type('mobile')],
+            ...$rules,
             'license' => ['required', Rule::unique('drivers')],
         ];
     }

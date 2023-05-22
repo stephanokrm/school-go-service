@@ -32,6 +32,9 @@ class TripController extends Controller
                 $builder->whereRelation('itinerary', 'driver_id', $request->user()->driver->id);
                 $builder->whereDate('arrive_at', Carbon::today());
             })
+            ->when($request->query('administrator', false), function (Builder $builder) use ($request) {
+                $builder->with('students');
+            })
             ->oldest('started_at')
             ->oldest('arrive_at')
             ->oldest('finished_at')
