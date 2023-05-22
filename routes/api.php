@@ -29,6 +29,8 @@ Route::post('/trip/schedule', [TripController::class, 'schedule'])->middleware('
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/me', [UserController::class, 'me']);
     Route::post('/user/logout', [UserController::class, 'logout']);
+    Route::put('/trip/{trip}/start', [TripController::class, 'start']);
+    Route::put('/trip/{trip}/end', [TripController::class, 'end']);
     Route::put('/trip/{trip}/student/{student}/embark', [TripController::class, 'embark']);
     Route::put('/trip/{trip}/student/{student}/disembark', [TripController::class, 'disembark']);
     Route::put('/trip/{trip}/student/{student}/absent', [TripController::class, 'absent']);

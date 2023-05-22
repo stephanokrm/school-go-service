@@ -16,13 +16,8 @@ class Trip extends Model
      * @var string[]
      */
     protected $fillable = [
-        'path',
-        'arrive_at',
         'latitude',
         'longitude',
-        'started_at',
-        'finished_at',
-        'round',
     ];
 
     /**
