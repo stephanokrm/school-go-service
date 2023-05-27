@@ -87,6 +87,7 @@ class TripController extends Controller
                 ->students()
                 ->newPivotStatement()
                 ->where('trip_id', $trip->getKey())
+                ->where('absent', false)
                 ->update(['embarked_at' => Carbon::now()]);
 
             $trip->getStudents()->each(function (Student $student) {
@@ -111,6 +112,7 @@ class TripController extends Controller
                 ->students()
                 ->newPivotStatement()
                 ->where('trip_id', $trip->getKey())
+                ->where('absent', false)
                 ->update(['disembarked_at' => Carbon::now()]);
 
             $trip->getStudents()->each(function (Student $student) {
@@ -364,6 +366,6 @@ class TripController extends Controller
         $trip->setAttribute('round', $round);
         $trip->itinerary()->associate($itinerary);
         $trip->save();
-        $trip->students()->sync($orderedStudents);
+        $trip->students()->where('absent', false)->sync($orderedStudents);
     }
 }
