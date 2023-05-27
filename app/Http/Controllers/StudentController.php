@@ -99,7 +99,7 @@ class StudentController extends Controller
 
         $this->addressService->update($student->getAddress(), collect($request->input('address')));
 
-        $student->fill($student->getFillable());
+        $student->fill($request->only($student->getFillable()));
         $student->responsible()->associate($responsible);
         $student->school()->associate($school);
         $student->save();
