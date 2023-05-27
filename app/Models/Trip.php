@@ -73,6 +73,7 @@ class Trip extends Model
             ->belongsToMany(Student::class)
             ->withPivot('order', 'absent', 'embarked_at', 'disembarked_at')
             ->withTimestamps()
+            ->where('absent', false)
             ->latest($this->getAttribute('round') ? 'disembarked_at' : 'embarked_at')
             ->orderBy('order');
     }

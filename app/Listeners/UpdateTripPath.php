@@ -30,7 +30,6 @@ class UpdateTripPath
         $destinationPlaceId = $trip->getAttribute('round') ? $itineraryAddressPlaceId : $schoolAddressPlaceId;
         $completed = $trip
             ->students()
-            ->where('absent', false)
             ->when($trip->getAttribute('round'), function (Builder $query) {
                 $query->whereNotNull('student_trip.disembarked_at');
             })
@@ -40,7 +39,6 @@ class UpdateTripPath
             ->count();
         $students = $trip
             ->students()
-            ->where('absent', false)
             ->when($trip->getAttribute('round'), function (Builder $query) {
                 $query->whereNull('student_trip.disembarked_at');
             })
@@ -78,7 +76,7 @@ class UpdateTripPath
                 }, collect())
                 ->all();
 
-            $trip->students()->where('absent', false)->syncWithoutDetaching($orderedStudents);
+            $trip->students()->syncWithoutDetaching($orderedStudents);
         }
     }
 }
