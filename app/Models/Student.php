@@ -108,6 +108,9 @@ class Student extends Model
         return $this
             ->belongsToMany(Trip::class)
             ->withPivot('order', 'absent', 'embarked_at', 'disembarked_at')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->oldest('started_at')
+            ->oldest('arrive_at')
+            ->oldest('finished_at');
     }
 }
