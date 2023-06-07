@@ -35,8 +35,8 @@ class TripController extends Controller
             ->when($request->query('administrator', false), function (Builder $builder) use ($request) {
                 $builder->with('students');
             })
+            ->latest('arrive_at')
             ->oldest('started_at')
-            ->oldest('arrive_at')
             ->oldest('finished_at')
             ->get();
 
