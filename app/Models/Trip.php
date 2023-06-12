@@ -38,7 +38,6 @@ class Trip extends Model
      */
     protected $with = [
         'itinerary',
-        'students',
     ];
 
     /**
@@ -79,7 +78,7 @@ class Trip extends Model
             ->belongsToMany(Student::class)
             ->withPivot('order', 'absent', 'embarked_at', 'disembarked_at')
             ->withTimestamps()
-            ->latest($this->isRound() ? 'disembarked_at' : 'embarked_at')
+            ->orderByRaw('CASE WHEN round IS TRUE THEN disembarked_at ELSE embarked_at')
             ->orderBy('order');
     }
 }
