@@ -58,7 +58,7 @@ class Trip extends Model
 
     public function isRound(): bool
     {
-        return $this->getAttribute('round');
+        return $this->round;
     }
 
     /**
