@@ -57,7 +57,7 @@ class TripController extends Controller
      */
     public function show(Trip $trip): TripResource
     {
-        return new TripResource($trip->load('students'));
+        return new TripResource($trip);
     }
 
     /**

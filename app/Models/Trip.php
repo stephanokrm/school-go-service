@@ -38,6 +38,7 @@ class Trip extends Model
      */
     protected $with = [
         'itinerary',
+        'students',
     ];
 
     /**
@@ -58,7 +59,7 @@ class Trip extends Model
 
     public function isRound(): bool
     {
-        return $this->round;
+        return $this->getAttribute('round');
     }
 
     /**
