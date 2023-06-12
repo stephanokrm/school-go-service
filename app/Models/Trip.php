@@ -78,7 +78,7 @@ class Trip extends Model
             ->belongsToMany(Student::class)
             ->withPivot('order', 'absent', 'embarked_at', 'disembarked_at')
             ->withTimestamps()
-            ->orderByRaw('CASE WHEN round IS TRUE THEN disembarked_at ELSE embarked_at')
+            ->orderByRaw('CASE WHEN round IS TRUE THEN disembarked_at ELSE embarked_at END')
             ->orderBy('order');
     }
 }
