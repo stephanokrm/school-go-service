@@ -13,6 +13,7 @@ use App\Notifications\AbsentNotification;
 use App\Notifications\DisembarkedNotification;
 use App\Notifications\EmbarkedNotification;
 use App\Notifications\PresentNotification;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
@@ -57,7 +58,11 @@ class TripController extends Controller
      */
     public function show(Trip $trip): TripResource
     {
-        return new TripResource($trip);
+        return new TripResource($trip->load(['students' => function (BelongsToMany $belongsToMany) use ($trip) {
+            $belongsToMany
+                ->latest($trip->isRound() ? 'disembarked_at' : 'embarked_at')
+                ->orderBy('order');
+        }]));
     }
 
     /**
