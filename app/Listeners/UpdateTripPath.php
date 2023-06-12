@@ -24,27 +24,27 @@ class UpdateTripPath
         if ($newOriginPlaceId) {
             $originPlaceId = $newOriginPlaceId;
         } else {
-            $originPlaceId = $trip->getAttribute('round') ? $schoolAddressPlaceId : $itineraryAddressPlaceId;
+            $originPlaceId = $trip->isRound() ? $schoolAddressPlaceId : $itineraryAddressPlaceId;
         }
 
-        $destinationPlaceId = $trip->getAttribute('round') ? $itineraryAddressPlaceId : $schoolAddressPlaceId;
+        $destinationPlaceId = $trip->isRound() ? $itineraryAddressPlaceId : $schoolAddressPlaceId;
         $completed = $trip
             ->students()
             ->where('absent', false)
-            ->when($trip->getAttribute('round'), function (Builder $query) {
+            ->when($trip->isRound(), function (Builder $query) {
                 $query->whereNotNull('student_trip.disembarked_at');
             })
-            ->when(!$trip->getAttribute('round'), function (Builder $query) {
+            ->when(!$trip->isRound(), function (Builder $query) {
                 $query->whereNotNull('student_trip.embarked_at');
             })
             ->count();
         $students = $trip
             ->students()
             ->where('absent', false)
-            ->when($trip->getAttribute('round'), function (Builder $query) {
+            ->when($trip->isRound(), function (Builder $query) {
                 $query->whereNull('student_trip.disembarked_at');
             })
-            ->when(!$trip->getAttribute('round'), function (Builder $query) {
+            ->when(!$trip->isRound(), function (Builder $query) {
                 $query->whereNull('student_trip.embarked_at');
             })
             ->get();

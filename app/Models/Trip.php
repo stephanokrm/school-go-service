@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -57,6 +56,11 @@ class Trip extends Model
         return $this->getAttribute('students');
     }
 
+    public function isRound(): bool
+    {
+        return $this->getAttribute('round');
+    }
+
     /**
      * @return BelongsTo
      */
@@ -74,7 +78,7 @@ class Trip extends Model
             ->belongsToMany(Student::class)
             ->withPivot('order', 'absent', 'embarked_at', 'disembarked_at')
             ->withTimestamps()
-            ->latest($this->getAttribute('round') ? 'disembarked_at' : 'embarked_at')
+            ->latest($this->isRound() ? 'disembarked_at' : 'embarked_at')
             ->orderBy('order');
     }
 }
