@@ -183,7 +183,7 @@ class TripController extends Controller
 
         event(new TripUpdated($trip));
 
-        $trip->getItinerary()->getDriver()->getUser()->notify(new AbsentNotification($student));
+        $trip->getItinerary()->getDriver()->getUser()->notify(new AbsentNotification($trip, $student));
 
         return new TripResource($trip);
     }
@@ -201,7 +201,7 @@ class TripController extends Controller
 
         event(new TripUpdated($trip));
 
-        $trip->getItinerary()->getDriver()->getUser()->notify(new PresentNotification($student));
+        $trip->getItinerary()->getDriver()->getUser()->notify(new PresentNotification($trip, $student));
 
         return new TripResource($trip);
     }

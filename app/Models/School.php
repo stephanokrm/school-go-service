@@ -44,6 +44,14 @@ class School extends Model
     ];
 
     /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->getAttribute('name');
+    }
+
+    /**
      * @return Address
      */
     public function getAddress(): Address

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Student;
+use App\Models\Trip;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
@@ -17,9 +18,10 @@ class AbsentNotification extends Notification
     use Queueable;
 
     /**
+     * @param Trip $trip
      * @param Student $student
      */
-    public function __construct(private readonly Student $student)
+    public function __construct(private readonly Trip $trip, private readonly Student $student)
     {
     }
 
@@ -37,10 +39,11 @@ class AbsentNotification extends Notification
      */
     public function toFcm(): FcmMessage
     {
-        return FcmMessage::create()
-            ->setNotification(
-                FcmNotification::create()
-                    ->setTitle("{$this->student->getFirstName()} não irá comparecer.")
-            );
+        $student = $this->student->getFirstName();
+        $school = $this->trip->getItinerary()->getSchool()->getName();
+        $direction = $this->trip->isRound() ? "ida para" : "volta de";
+        $title = "{$student} não irá comparecer na {$direction} {$school}.";
+
+        return FcmMessage::create()->setNotification(FcmNotification::create()->setTitle($title));
     }
 }
