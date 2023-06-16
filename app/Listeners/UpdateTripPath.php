@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\TripUpdated;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class UpdateTripPath
@@ -16,18 +17,26 @@ class UpdateTripPath
     public function handle(TripUpdated $event): void
     {
         $trip = $event->getTrip();
-        $newOriginPlaceId = $event->getOrigin();
+        $isInProgress = $trip->getStartedAt() instanceof Carbon && $trip->getFinishedAt() === null;
 
         $itineraryAddressPlaceId = $trip->getItinerary()->getAddress()->getAttribute('place_id');
         $schoolAddressPlaceId = $trip->getItinerary()->getSchool()->getAddress()->getAttribute('place_id');
 
-        if ($newOriginPlaceId) {
-            $originPlaceId = $newOriginPlaceId;
+        if ($isInProgress) {
+            $origin = "{$trip->getAttribute('latitude')},{$trip->getAttribute('longitude')}";
         } else {
-            $originPlaceId = $trip->isRound() ? $schoolAddressPlaceId : $itineraryAddressPlaceId;
+            if ($newOriginPlaceId = $event->getOrigin()) {
+                $originPlaceId = $newOriginPlaceId;
+            } else {
+                $originPlaceId = $trip->isRound() ? $schoolAddressPlaceId : $itineraryAddressPlaceId;
+            }
+
+            $origin = "place_id:{$originPlaceId}";
         }
 
         $destinationPlaceId = $trip->isRound() ? $itineraryAddressPlaceId : $schoolAddressPlaceId;
+        $destination = "place_id:{$destinationPlaceId}";
+
         $completed = $trip
             ->students()
             ->where('absent', false)
@@ -54,8 +63,8 @@ class UpdateTripPath
         }, 'optimize:true');
 
         $params = [
-            'origin' => "place_id:{$originPlaceId}",
-            'destination' => "place_id:{$destinationPlaceId}",
+            'origin' => $origin,
+            'destination' => $destination,
             'waypoints' => $waypoints,
             'alternatives' => false,
             'mode' => 'driving',

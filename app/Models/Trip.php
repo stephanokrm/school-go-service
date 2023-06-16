@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class Trip extends Model
@@ -39,6 +40,22 @@ class Trip extends Model
     protected $with = [
         'itinerary',
     ];
+
+    /**
+     * @return Carbon|null
+     */
+    public function getStartedAt(): ?Carbon
+    {
+        return $this->getAttribute('started_at');
+    }
+
+    /**
+     * @return Carbon|null
+     */
+    public function getFinishedAt(): ?Carbon
+    {
+        return $this->getAttribute('finished_at');
+    }
 
     /**
      * @return Itinerary
