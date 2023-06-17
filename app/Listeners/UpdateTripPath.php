@@ -18,12 +18,13 @@ class UpdateTripPath
     {
         $trip = $event->getTrip();
         $isInProgress = $trip->getStartedAt() instanceof Carbon && $trip->getFinishedAt() === null;
-
+        $latitude = $trip->getAttribute('latitude');
+        $longitude = $trip->getAttribute('longitude');
         $itineraryAddressPlaceId = $trip->getItinerary()->getAddress()->getAttribute('place_id');
         $schoolAddressPlaceId = $trip->getItinerary()->getSchool()->getAddress()->getAttribute('place_id');
 
-        if ($isInProgress) {
-            $origin = "{$trip->getAttribute('latitude')},{$trip->getAttribute('longitude')}";
+        if ($isInProgress && $latitude !== null && $longitude !== null) {
+            $origin = "{$latitude},{$longitude}";
         } else {
             if ($newOriginPlaceId = $event->getOrigin()) {
                 $originPlaceId = $newOriginPlaceId;

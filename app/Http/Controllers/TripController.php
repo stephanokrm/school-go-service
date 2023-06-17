@@ -13,7 +13,9 @@ use App\Notifications\AbsentNotification;
 use App\Notifications\DisembarkedNotification;
 use App\Notifications\EmbarkedNotification;
 use App\Notifications\PresentNotification;
+use Exception;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
@@ -96,7 +98,10 @@ class TripController extends Controller
                 ->update(['embarked_at' => Carbon::now()]);
 
             $trip->getStudents()->each(function (Student $student) {
-                $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
+                try {
+                    $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
+                } catch (Exception $exception) {
+                }
             });
         }
 
@@ -112,7 +117,7 @@ class TripController extends Controller
         $trip->setAttribute('finished_at', Carbon::now());
         $trip->save();
 
-        if (!$trip->getAttribute('round')) {
+        if (!$trip->isRound()) {
             $trip
                 ->students()
                 ->newPivotStatement()
@@ -121,9 +126,25 @@ class TripController extends Controller
                 ->update(['disembarked_at' => Carbon::now()]);
 
             $trip->getStudents()->each(function (Student $student) {
-                $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
+                try {
+                    $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
+                } catch (Exception $exception) {
+                }
             });
         }
+
+        $trip
+            ->students()
+            ->newPivotStatement()
+            ->where('trip_id', $trip->getKey())
+            ->where('absent', false)
+            ->when($trip->isRound(), function (QueryBuilder $query) {
+                $query->whereNull('disembarked_at');
+            })
+            ->when(!$trip->isRound(), function (QueryBuilder $query) {
+                $query->whereNull('embarked_at');
+            })
+            ->update(['absent' => true]);
 
         return new TripResource($trip);
     }
@@ -144,7 +165,10 @@ class TripController extends Controller
 
         event($event);
 
-        $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
+        try {
+            $student->getResponsible()->getUser()->notify(new EmbarkedNotification($student));
+        } catch (Exception $exception) {
+        }
 
         return new TripResource($trip);
     }
@@ -165,7 +189,10 @@ class TripController extends Controller
 
         event($event);
 
-        $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
+        try {
+            $student->getResponsible()->getUser()->notify(new DisembarkedNotification($student));
+        } catch (Exception $exception) {
+        }
 
         return new TripResource($trip);
     }
@@ -183,7 +210,10 @@ class TripController extends Controller
 
         event(new TripUpdated($trip));
 
-        $trip->getItinerary()->getDriver()->getUser()->notify(new AbsentNotification($trip, $student));
+        try {
+            $trip->getItinerary()->getDriver()->getUser()->notify(new AbsentNotification($trip, $student));
+        } catch (Exception $exception) {
+        }
 
         return new TripResource($trip);
     }
@@ -201,7 +231,10 @@ class TripController extends Controller
 
         event(new TripUpdated($trip));
 
-        $trip->getItinerary()->getDriver()->getUser()->notify(new PresentNotification($trip, $student));
+        try {
+            $trip->getItinerary()->getDriver()->getUser()->notify(new PresentNotification($trip, $student));
+        } catch (Exception $exception) {
+        }
 
         return new TripResource($trip);
     }
